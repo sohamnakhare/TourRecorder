@@ -16,6 +16,12 @@
         document.head.appendChild(myScript);
     };
 
+    var injectPopper = function() {
+        var myScript = document.createElement("script");
+        myScript.src = "https://unpkg.com/popper.js/dist/umd/popper.min.js";
+        document.head.appendChild(myScript);
+    }
+
     var injectXPathFinder = function() {
         var myScript = document.createElement("script");
         myScript.src = "http://localhost:3000/javascripts/elementXPath.js";
@@ -70,6 +76,32 @@
         `;
     }
 
+    var stepInformationBubble = function() {
+        return `
+            <div id="tour-step-info-bubble"
+                style="background-color:#1591f7;width:250px; height:200px;padding:8px;
+                    box-shadow: -2px 4px 8px grey;z-index:999">
+                <div>
+                    <input type="text"
+                        placeholder="enter title" 
+                        style="background:white;width:100%;height:40px;padding:8px"/>
+                </div>
+                <div style="margin-top:15px">
+                    <textarea placeholder="enter description"
+                        style="background:white;width:100%;height:80px;padding:8px"></textarea>
+                </div>
+                <div style="margin-top:10px">
+                    <div style="float:left;width:50%;padding:5px">
+                        <button style="width:100%;height:30px">Cancel</button>
+                    </div>
+                    <div style="float:left;width:50%;padding:5px">
+                        <button style="width:100%;height:30px">Next</button>
+                    </div>
+                </div>
+            </div>
+        `
+    }
+
     var renderTourRecorderTemplate = function() {
         var markUp = `
             <div id="tour-recorder-container">
@@ -83,6 +115,7 @@
                         box-shadow: -2px 4px 8px grey;z-index:999">
                         ${tourRecordingPanel()}
                 </div>
+                ${stepInformationBubble()}
             </div>
         `;
         var tourRecorderElement = document.createElement("div");
@@ -102,6 +135,19 @@
                 handleElementSelect: function(ev) {
                     ev.preventDefault();
                     ev.stopPropagation();
+                    var reference = ev.target;
+                    var popper = document.querySelector('#tour-step-info-bubble');
+                    var popperInstance = new Popper(reference, popper, {
+                        placement: 'bottom',
+                        modifiers: {
+                            arrow: {
+                                enabled: true
+                            },
+                            flip: {
+                                behavior: ['right','left', 'top']
+                            }
+                        }
+                    });
                     console.log('x path: ', this.getElementXPath(ev.target));
                 },
                 handleElementHover: function(ev){
@@ -128,15 +174,6 @@
                     document.removeEventListener('mouseout', this.handleElementMouseOut);
                 },
                 getElementXPath: function(element) {
-                    // var xpath = '';
-                    // for ( ; element && element.nodeType == 1; element = element.parentNode ) {
-                    //     var id = $(element.parentNode)
-                    //     .children(element.tagName)
-                    //     .index(element) + 1;
-                    //     id > 1 ? (id = '[' + id + ']') : (id = '');
-                    //     xpath = '/' + element.tagName.toLowerCase() + id + xpath;
-                    // }
-                    // return xpath;
                     return getElementXpath(element);
                 }
             }
@@ -146,5 +183,5 @@
     injectXPathFinder();
     addEmptyIFrame();
     injectVueScript();
-
+    injectPopper();
 })();
